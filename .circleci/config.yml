@@ -1,0 +1,62 @@
+version: 2.1
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - hugo_job:
+          name: deploy-prod
+          domain: PRD
+          requires:
+            - preview
+          filters:
+            branches:
+              only: master
+      - hugo_job:
+          name: preview #fun fact, naming this "deploy-preview" will intefere with netlify CMS attempt to get prevuew URL from GH checks,
+          domain: PREVIEW 
+       #   requires:
+       #     - deploy-test
+
+jobs:
+  hugo_job:
+    parameters:
+      domain:
+        description: Environment variables prefix. 
+        type: string
+        default: TEST   
+    docker:
+      - image: cibuilds/hugo:0.64
+    working_directory: ~/repo
+    steps:
+      - checkout   
+      - run:
+          name: Checkout submodule (theme)
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
+          name: HUGO build for ${<<parameters.domain>>HOST}
+          command: |
+            hugo -v -s ~/repo/src/ --destination /tmp/public -b https://${<<parameters.domain>>HOST}
+            ls /tmp/public
+            if [ ! -f /tmp/public/index.html ];then
+              echo "index.html not created, failing"
+              exit 1
+            fi
+      - add_ssh_keys
+      - run:
+          name: Keyscan  (HACK)
+          command: ssh-keyscan -H ${<<parameters.domain>>HOST} >> ~/.ssh/known_hosts
+      - run:
+          name: Deploy public folder to ${<<parameters.domain>>HOST}
+          command: |
+            rsync -avz --delete /tmp/public/ ${<<parameters.domain>>USER}@${<<parameters.domain>>HOST}:${<<parameters.domain>>PATH}/
+      - run:
+          name: Simple content check
+          command: |
+            HTTPCODE=`curl -s -o /dev/null -w "%{http_code}" https://${<<parameters.domain>>HOST}/index.html`
+            if [ "$HTTPCODE" -ne 200 ];then
+              echo "index.html not found, failing"
+              exit 1
+            fi

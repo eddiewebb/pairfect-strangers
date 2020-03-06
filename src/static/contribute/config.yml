@@ -1,0 +1,126 @@
+backend:
+  name: github
+  repo: eddiewebb/pairfect-strangers
+
+
+media_folder: "src/static/uploads" # Folder where user uploaded files should go
+public_folder: "/uploads"
+
+collections: # A list of collections the CMS should be able to edit
+  - name: "Post" # Used in routes, ie.: /admin/collections/:slug/edit
+    label: "Post" # Used in the UI, ie.: "New Post"
+    folder: "src/content/posts" # The path to the folder where the documents are stored
+    create: true # Allow users to create new documents in this collection
+    fields: # The fields each document in this collection have
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Publish Date", name: "date", widget: "datetime"}
+      - {label: "Intro Blurb", name: "description", widget: "text"}
+      - {label: "Image", name: "image", widget: "image", required: false}
+      - {label: "Body", name: "body", widget: "markdown"}
+  - name: "pages"
+    label: "Pages"
+    files:
+      - file: "src/content/_index.md"
+        label: "Home Page"
+        name: "home"
+        fields:
+          - {label: Title, name: title, widget: string}
+          - {label: News, name: news, widget: markdown, required: false}
+          - {label: Pricing, name: pricing, widget: markdown}
+          - {label: "Blurb", name: intro, widget: object, fields: [
+              {label: "Logo", name: "logo", widget: image, required: false},
+              {label: "Heading", name: "header", widget: string},
+              {label: "Text", name: "text", widget: "markdown"},
+              {label: "Backgrounds", name: "backgroundz", widget: "list", field:
+                {label: "Image 1", name: "primary", widget: "image"}
+              }
+            ]}
+          - {label: "About", name: about, widget: object, fields: [
+              {label: "Heading", name: "header", widget: string},
+              {label: "Text", name: "text", widget: "markdown"}
+            ]}
+          - {label: "Contact", name: contact, widget: object, fields: [
+              {label: "Heading", name: "header", widget: string},
+              {label: "Text", name: "text", widget: "markdown"}
+            ]}
+          - {label: "Map API Key", name: mapsapikey, widget: hidden, default: "AIzaSyB1sqsVhzo0ZpxmnlNO3DlfDU8sIrQGSWY" }
+
+  - name: 'workshops'
+    label: 'Workshops / Events'
+    editor:
+      preview: false
+    create: true
+    folder: src/data/workshops
+    identifier_field: title   
+    format: json
+    fields:
+      - {label: Title, name: title, widget: string }
+      - {label: Instructor, name: instructor, widget: relation, collection: instructors, searchFields: ['name'], valueField: name, required: false}
+      - {label: "Text", name: "text", widget: "markdown"}
+      - {label: "Dates", name: "dates", widget: "string", required: false}
+  - name: 'classes'
+    label: 'Class Info'
+    editor:
+      preview: false
+    create: true
+    folder: src/data/classes
+    identifier_field: name   
+    format: json
+    fields:
+      - {label: Name, name: name, widget: string}
+      - {label: Description, name: description, widget: markdown, required: false}
+      - {label: Instructor, name: instructor, widget: relation, collection: instructors, searchFields: ['name'], valueField: name, required: false}
+      - {label: Type, name: age, widget: select, options: ["Child","Adult"], required: false}
+      - label: days
+        name: days
+        required: false
+        collapsed: false
+        widget: list
+        fields:
+          - {label: Day, name: day, widget: select, options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] }
+          - {label: Start, name: start, widget: datetime, format: "h:mm a", dateFormat: false}
+          - {label: End, name: end, widget: datetime, format: "h:mm a", dateFormat: false, required: false, default: ""}
+
+          
+  - name: 'instructors'
+    label: 'Instructor Bios'
+    create: true
+    folder: src/data/instructors/
+    format: json
+    identifier_field: name
+    fields:
+      - {label: name, name: name, widget: string}
+      - {label: image, name: image, widget: image}
+      - {label: certifications, name: certifications, widget: markdown, required: false}
+      - {label: Bio, name: bio, widget: markdown}
+
+  - name: 'settings'
+    label: 'Settings'
+    delete: false # Prevent users from deleting documents in this collection
+    editor:
+      preview: false
+    files:
+      - name: 'general'
+        label: 'Site Settings'
+        file: 'src/config.toml'
+        extension: toml
+        description: 'General Site Settings'
+        fields:
+          - { label: 'Global title', name: 'title', widget: 'string' }
+          - { label: 'Site Url', name: 'baseURL', widget: 'string' }
+          - { label: Copyright, name: copyright, widget: markdown }          
+          - {label: "Extras", name: params, widget: object, fields: [
+              {label: "Social", name: socialhandles, widget: object, fields: [
+                {label: "Twitter", name: "twitter", widget: string, required: false},
+                {label: "Instagram", name: "instagram", widget: "string", required: false},
+                {label: "Facebook", name: "facebook", widget: "string", required: false}
+              ]}
+            ]}
+          - { label: 'Theme', name: 'theme', widget: 'hidden', default: "hugograyscale" }
+          - { label: 'Language Code', name: 'languageCode', widget: 'hidden', default: "en-us" }
+          - {label: "Menu", name: menu, widget: object, field: {label: Navigation, name: main, widget: list, fields: [ 
+              {label: "Name", name: "name", widget: string},
+              {label: "Url", name: "url", widget: "string"},
+              {label: "Order", name: "weight", widget: "number"}
+            ]}}
+          
