@@ -8,6 +8,8 @@ hasCJKLanguage = true
 
 enableRobotsTXT = true
 
+enableEmoji = true
+
 # Enable Disqus
 #disqusShortname = "XXX"
 
