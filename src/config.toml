@@ -44,7 +44,7 @@ theme = "xcode"
 darkTheme = "xcode-dark"  # apply this theme in dark mode
 
 [params.nav]
-showCategories = true       # /categories/
+showCategories = false       # /categories/
 showTags = true             # /tags/
 
 # custom navigation items
